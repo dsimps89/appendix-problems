@@ -1,0 +1,16 @@
+import dimod
+from dwave.system import DWaveSampler, EmbeddingComposite
+
+# Define the problem as a list of items, each with a weight and value
+items = [(1, 5), (2, 3), (3, 4), (4, 5)]
+capacity = 7
+
+# Convert the problem to a binary quadratic model (BQM)
+bqm = dimod.KnapsackQuadraticModel.from_inputs(capacity, items)
+
+# Use the D-Wave quantum computer to solve the BQM
+sampler = EmbeddingComposite(DWaveSampler())
+response = sampler.sample(bqm, num_reads=1000)
+
+# Print the best solution found
+print("Best solution found:", response.first.sample)
