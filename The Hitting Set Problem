@@ -1,0 +1,17 @@
+!pip install dwave-ocean-sdk
+import dimod
+from dwave.system.samplers import DWaveSampler
+from dwave.system.composites import EmbeddingComposite
+
+# Define the problem as a binary quadratic model
+bqm = dimod.BinaryQuadraticModel({0: 1, 1: 1, 2: 1}, {(0, 1): 2, (1, 2): 2}, 0, dimod.BINARY)
+
+# Set up the QPU/sampler and solve
+sampler = EmbeddingComposite(DWaveSampler())
+response = sampler.sample(bqm, num_reads=1000)
+
+# Extract the best solution
+best_sample = next(iter(response))
+best_hitting_set = [i for i in best_sample.keys() if best_sample[i]]
+
+print("Best hitting set: ", best_hitting_set)
