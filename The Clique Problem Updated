@@ -1,0 +1,22 @@
+import dimod
+from dwave.system import DWaveSampler, EmbeddingComposite
+
+def find_clique(graph):
+    sampler = EmbeddingComposite(DWaveSampler())
+    bqm = dimod.BinaryQuadraticModel.from_networkx_graph(graph, 1, -1)
+    response = sampler.sample(bqm, num_reads=100)
+    clique = set()
+    for sample, energy, num_occurrences in response.data(['sample', 'energy', 'num_occurrences']):
+        nodes = set([v for v, b in sample.items() if b == 1])
+        if len(nodes) > len(clique):
+            clique = nodes
+    return clique
+
+def solve_clique_problem():
+    # Code to read graph from user input and convert it to a networkx graph
+    clique = find_clique(graph)
+    print("The largest clique in the graph has size", len(clique))
+    print("The vertices in the clique are", clique)
+
+if __name__ == '__main__':
+    solve_clique_problem()
