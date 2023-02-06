@@ -1,0 +1,11 @@
+import dwave_networkx as dnx
+import networkx as nx
+
+# Define the graph
+G = nx.complete_graph(5)
+
+# Find the largest clique in the graph
+result = dnx.maximum_clique(G, solver=dnx.DWaveSampler(), num_reads=1000)
+
+# Print the largest clique found
+print("Largest Clique:", result)
