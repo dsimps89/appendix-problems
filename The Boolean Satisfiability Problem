@@ -1,0 +1,15 @@
+import dimod
+from dwave.system import DWaveSampler, EmbeddingComposite
+
+# Define the problem as a list of constraints in the form of (x, y, z) where x and y are binary variables and z is a boolean operator
+problem = [(0, 1, True), (1, 2, True), (0, 2, False)]
+
+# Convert the problem to a binary quadratic model (BQM)
+bqm = dimod.BinaryQuadraticModel.from_qubo(dimod.qubo_from_problem(problem))
+
+# Use the D-Wave quantum computer to solve the BQM
+sampler = EmbeddingComposite(DWaveSampler())
+response = sampler.sample(bqm, num_reads=1000)
+
+# Print the best solution found
+print("Best solution found:", response.first.sample)
