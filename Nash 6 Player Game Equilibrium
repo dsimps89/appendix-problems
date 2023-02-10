@@ -1,0 +1,33 @@
+def nash_equilibrium(payoff_matrix):
+    best_response = [-1000000 for i in range(6)]
+    
+    # find the best response for each player
+    for p in range(6):
+        for i in range(len(payoff_matrix)):
+            if payoff_matrix[i][p] > best_response[p]:
+                best_response[p] = payoff_matrix[i][p]
+    
+    # check if all best responses are equal
+    nash_eq = all(x == best_response[0] for x in best_response)
+
+    if nash_eq:
+        # return the Nash Equilibrium
+        return tuple(best_response)
+    else:
+        # return None if no Nash Equilibrium exists
+        return None
+
+# Get input for six players
+payoff_matrix = []
+for i in range(6):
+    print("Enter the scores for player", i + 1, ":")
+    scores = [int(x) for x in input().split()]
+    payoff_matrix.append(tuple(scores))
+
+# find the Nash Equilibrium
+result = nash_equilibrium(payoff_matrix)
+
+if result is not None:
+    print("The Nash Equilibrium is:", result)
+else:
+    print("No Nash Equilibrium exists.")
