@@ -1,0 +1,46 @@
+import sys
+import json
+import dimod
+from dwave.system import DWaveSampler, EmbeddingComposite
+from dwave_qbsolv import QBSolv
+
+def sat_problem(cnf_formula):
+    bqm = dimod.BinaryQuadraticModel.from_cnf(cnf_formula)
+
+    sampler = EmbeddingComposite(DWaveSampler())
+    response = QBSolv().sample(bqm, num_repeats=100, solver=sampler, verbosity=0)
+    best_solution = response.first.sample
+
+    return best_solution
+
+def save_solution(solution, filename):
+    with open(filename, 'w') as f:
+        json.dump(solution, f)
+
+def load_solution(filename):
+    with open(filename, 'r') as f:
+        return json.load(f)
+
+def main():
+    print("Boolean Satisfiability Problem (SAT) Solver for D-Wave")
+
+    cnf_formula = input("Enter the CNF formula (e.g., (1 OR ~2) AND (~1 OR 2)): ")
+    cnf_formula = cnf_formula.strip().replace('(', '').replace(')', '').split(' AND ')
+
+    cnf_clauses = []
+    for clause in cnf_formula:
+        literals = clause.split(' OR ')
+        literals = [int(lit.replace(' ', '')) if '~' not in lit else -int(lit.replace(' ', '').replace('~', '')) for lit in literals]
+        cnf_clauses.append(literals)
+
+    solution = sat_problem(cnf_clauses)
+    print(f"Solution: {solution}")
+
+    save_choice = input("Do you want to save the solution? (y/n): ")
+    if save_choice.lower() == 'y':
+        filename = input("Enter the filename: ")
+        save_solution(solution, filename)
+        print(f"Solution saved to {filename}")
+
+if __name__ == "__main__":
+    main()
