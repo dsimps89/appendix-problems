@@ -1,0 +1,58 @@
+pip install dwave-ocean-sdk
+
+import sys
+import json
+import dimod
+from dwave.system import DWaveSampler, EmbeddingComposite
+from dwave_qbsolv import QBSolv
+
+def knapsack_problem(weights, values, max_weight):
+    n = len(weights)
+    variables = [f"x{i}" for i in range(n)]
+
+    # Objective function
+    h = {v: -values[i] for i, v in enumerate(variables)}
+
+    # Constraint
+    J = {}
+    for i in range(n):
+        for j in range(i+1, n):
+            J[(variables[i], variables[j])] = 2 * max_weight * weights[i] * weights[j]
+    for i, v in enumerate(variables):
+        J[(v, v)] = weights[i] * (weights[i] - 2 * max_weight)
+
+    bqm = dimod.BinaryQuadraticModel(h, J, 0.0, dimod.BINARY)
+
+    sampler = EmbeddingComposite(DWaveSampler())
+    response = QBSolv().sample(bqm, num_repeats=100, solver=sampler, verbosity=0)
+    best_solution = response.first.sample
+
+    return best_solution
+
+def save_solution(solution, filename):
+    with open(filename, 'w') as f:
+        json.dump(solution, f)
+
+def load_solution(filename):
+    with open(filename, 'r') as f:
+        return json.load(f)
+
+def main():
+    print("Knapsack Problem Solver for D-Wave")
+    weights = list(map(int, input("Enter the weights (space-separated): ").split()))
+    values = list(map(int, input("Enter the values (space-separated): ").split()))
+    max_weight = int(input("Enter the maximum weight: "))
+
+    solution = knapsack_problem(weights, values, max_weight)
+    print(f"Solution: {solution}")
+
+    save_choice = input("Do you want to save the solution? (y/n): ")
+    if save_choice.lower() == 'y':
+        filename = input("Enter the filename: ")
+        save_solution(solution, filename)
+        print(f"Solution saved to {filename}")
+
+if __name__ == "__main__":
+    main()
+
+
